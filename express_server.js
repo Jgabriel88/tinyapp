@@ -15,7 +15,7 @@ const urlDatabase = {
 function generateRandomString() {
   let string = Math.random().toString(36).substring(7);
   return string;
-};
+}
 
 
 
@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {urls: urlDatabase};
   res.render("urls_index", templateVars);
-})
+});
 
 //New URL Form
 app.get("/urls/new", (req, res) => {
@@ -43,10 +43,17 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+//URL Deletion
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const urlToDelete = req.params.shortURL
+  delete urlDatabase[urlToDelete]
+  res.redirect("/urls")
+})
 
+//Link to redirect from short URL
 app.get("/u/:shortURL", (req, res) => {
-
-  res.redirect(`${urlDatabase.shortURL}`);
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 
 //URL show page
