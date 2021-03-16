@@ -1,15 +1,17 @@
 const express = require('express');
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080;
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser())
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
 };
 
 function generateRandomString() {
@@ -21,33 +23,39 @@ function generateRandomString() {
 
 
 //Home page
-app.get("/", (req, res) => {
-  res.send("Hello!");
+app.get('/', (req, res) => {
+  res.send('Hello!');
 });
 
 //URLS page
-app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase};
-  res.render("urls_index", templateVars);
+app.get('/urls', (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  res.render('urls_index', templateVars);
 });
 
 //New URL Form
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+app.get('/urls/new', (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render('urls_new', templateVars);
 });
 
 //New URL Creation
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
 //URL Deletion
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.post('/urls/:shortURL/delete', (req, res) => {
   const urlToDelete = req.params.shortURL
   delete urlDatabase[urlToDelete]
-  res.redirect("/urls")
+  res.redirect('/urls')
 })
 
 //EDIT Long URL
@@ -57,16 +65,32 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   res.redirect('/urls');
 });
 
+//Sign in cookie register
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username)
+  res.redirect('/urls')
+})
+//Logout, cookie deletion
+app.post('/logout', (req, res) => {
+  console.log(req.cookies)
+  res.clearCookie("username")
+  res.redirect('/urls')
+})
+
 //Link to redirect from short URL
-app.get("/u/:shortURL", (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
 //URL show page
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
-  res.render("urls_show", templateVars);
+app.get('/urls/:shortURL', (req, res) => {
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"]
+  };
+  res.render('urls_show', templateVars);
 });
 
 
