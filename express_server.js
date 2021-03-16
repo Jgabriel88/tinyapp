@@ -1,12 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser())
+app.use(cookieParser());
 
 
 const urlDatabase = {
@@ -14,10 +14,10 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-function generateRandomString() {
+const generateRandomString = () => {
   let string = Math.random().toString(36).substring(2, 8);
   return string;
-}
+};
 
 
 
@@ -53,28 +53,28 @@ app.post('/urls', (req, res) => {
 
 //URL Deletion
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const urlToDelete = req.params.shortURL
-  delete urlDatabase[urlToDelete]
-  res.redirect('/urls')
-})
+  const urlToDelete = req.params.shortURL;
+  delete urlDatabase[urlToDelete];
+  res.redirect('/urls');
+});
 
 //EDIT Long URL
 app.post('/urls/:shortURL/edit', (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL
+  urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
 });
 
 //Sign in cookie register
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username)
-  res.redirect('/urls')
-})
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 //Logout, cookie deletion
 app.post('/logout', (req, res) => {
-  res.clearCookie("username")
-  res.redirect('/urls')
-})
+  res.clearCookie("username");
+  res.redirect('/urls');
+});
 
 //Link to redirect from short URL
 app.get('/u/:shortURL', (req, res) => {
