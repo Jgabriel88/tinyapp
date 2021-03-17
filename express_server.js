@@ -8,6 +8,18 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
+const usersDb = {
+  "bVx3n2": {
+    id: "bVx3n2",
+    email: "user@example.com",
+    password: "test1"
+  },
+  "t9m5sK": {
+    id: "t9m5sK",
+    email: "user2@example.com",
+    password: "test2"
+  }
+}
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -19,6 +31,16 @@ const generateRandomString = () => {
   return string;
 };
 
+const emailLookup = (user, userDatabase) => {
+  const {email} = user
+  for (const key in userDatabase) {
+    if (email === userDatabase[key].email) {
+      return userDatabase[key]
+    }
+  }
+  return false
+}
+
 
 
 
@@ -29,17 +51,19 @@ app.get('/', (req, res) => {
 
 //URLS page
 app.get('/urls', (req, res) => {
+  const user = usersDb[req.cookies["user_id"]]
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user,
   };
   res.render('urls_index', templateVars);
 });
 
 //New URL Form
 app.get('/urls/new', (req, res) => {
+  const user = usersDb[req.cookies["user_id"]]
   const templateVars = {
-    username: req.cookies["username"]
+    user,
   };
   res.render('urls_new', templateVars);
 });
@@ -66,13 +90,24 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 });
 
 //Sign in cookie register
+app.get('/login', (req, res) => {
+  res.render('user_login')
+})
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  const user = emailLookup(req.body, usersDb)
+  if (!user) {
+    res.status(403).send("user not found")
+  } else {
+    if (user.password === req.body.password) {
+      res.cookie('user_id', user.id).redirect('/urls')
+    } else {res.status(403).send("wrong password!")}
+  }
 });
+
+
 //Logout, cookie deletion
 app.post('/logout', (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect('/urls');
 });
 
@@ -84,14 +119,32 @@ app.get('/u/:shortURL', (req, res) => {
 
 //URL show page
 app.get('/urls/:shortURL', (req, res) => {
+  const user = usersDb[req.cookies["user_id"]]
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user,
   };
   res.render('urls_show', templateVars);
 });
 
+//Register user form
+app.get('/register', (req, res) => {
+  res.render('user_register')
+})
+app.post('/register', (req, res) => {
+  newUser = {email, password} = req.body
+
+  if (emailLookup(newUser, usersDb)) {
+    res.status(400).send('Email already exists!')
+  } else {
+    id = generateRandomString()
+    usersDb[id] = {id, email, password}
+    res.cookie('user_id', id)
+    res.redirect('/urls')
+
+  }
+})
 
 
 
