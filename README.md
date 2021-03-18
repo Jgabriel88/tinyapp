@@ -4,9 +4,12 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Create a new user page. It only takes an email and password"](https://github.com/lucasapin/tinyapp/blob/master/docs/create_user.png?raw=true)
-!["Urls main page. It lists all the short URL's create by the user."](https://github.com/lucasapin/tinyapp/blob/master/docs/urls_page.png?raw=true)
-!["Update an existing URL."](https://github.com/lucasapin/tinyapp/blob/master/docs/edit_url_page.png?raw=true)
+!["Create a new user page. It only takes an email and password"](https://github.com/Jgabriel88/tinyapp/blob/master/docs/register.png?raw=true)
+!["Login page"](https://github.com/Jgabriel88/tinyapp/blob/master/docs/login.png?raw=true)
+!["Urls main page. It lists all the short URL's create by the user."](https://github.com/Jgabriel88/tinyapp/blob/master/docs/urls.png)
+!["Update an existing URL."](https://github.com/Jgabriel88/tinyapp/blob/master/docs/editPage.png?raw=true)
+![""Error 403 handling page](https://github.com/Jgabriel88/tinyapp/blob/master/docs/error403.png?raw=true)
+![""Error 404 handling page](https://github.com/Jgabriel88/tinyapp/blob/master/docs/error404.png?raw=true)
 
 
 ## Dependencies
