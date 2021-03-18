@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+
 const app = express();
 const PORT = 8080;
 
@@ -12,12 +14,12 @@ const usersDb = {
   "bVx3n2": {
     id: "bVx3n2",
     email: "teste@hotmail.com",
-    password: "123"
+    password: bcrypt.hashSync("123", 10)
   },
   "t9m5sK": {
     id: "t9m5sK",
     email: "user2@example.com",
-    password: "test2"
+    password: bcrypt.hashSync("test2", 10)
   }
 };
 
@@ -54,9 +56,6 @@ const urlsForUser = (id) => {
   } return filteredURL;
 };
 
-
-
-
 //Home page
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -73,7 +72,7 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   } else {
-    res.redirect('/login')
+    res.redirect('/login');
   }
 });
 
@@ -94,7 +93,6 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"]};
-  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -115,12 +113,10 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   if (req.cookies["user_id"]) {
     const shortURL = req.params.shortURL;
     urlDatabase[shortURL].longURL = req.body.longURL;
-    console.log(urlDatabase);
     res.redirect('/urls');
   } else {
     res.status(403).send("You are not allowed!");
   }
-
 });
 
 //Sign in cookie register
@@ -132,7 +128,7 @@ app.post('/login', (req, res) => {
   if (!user) {
     res.status(403).send("user not found");
   } else {
-    if (user.password === req.body.password) {
+    if (bcrypt.compareSync(req.body.password, user.password)) {
       res.cookie('user_id', user.id).redirect('/urls');
     } else {
       res.status(403).send("wrong password!");
@@ -160,7 +156,6 @@ app.get('/urls/:shortURL', (req, res) => {
     longURL: urlDatabase[req.params.shortURL].longURL,
     user,
   };
-
   res.render('urls_show', templateVars);
 });
 
@@ -169,17 +164,23 @@ app.get('/register', (req, res) => {
   res.render('user_register');
 });
 app.post('/register', (req, res) => {
-  const newUser = {email, password} = req.body;
-
+  if (!req.body.email || !req.body.password) {
+    res.status(400).send("Email and password are mandatory!");
+    return;
+  }
+  let {email, password} = req.body;
+  const newUser = {email, password};
+  password = bcrypt.hashSync(password, 10);
   if (emailLookup(newUser, usersDb)) {
     res.status(400).send('Email already exists!');
+    res.redirect("/register");
   } else {
     const id = generateRandomString();
     usersDb[id] = {id, email, password};
     res.cookie('user_id', id);
     res.redirect('/urls');
-
   }
+  console.log(usersDb);
 });
 
 
